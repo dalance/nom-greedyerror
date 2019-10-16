@@ -8,6 +8,32 @@ Custom error type of [nom](https://github.com/Geal/nom) to take a deepest error.
 The default error types of nom ( `(I, ErrorKind)` and `VerboseError` ) take a last challenged error at `alt` combinator.
 Alternatively `GreedyError` of nom-greedyerror take a deepest error.
 
+For example, the following parser accepts string like `abc012abc` or `012abc012`.
+
+```rust
+alt((
+    tuple((alpha1, digit1, alpha1)),
+    tuple((digit1, alpha1, digit1)),
+))(input)
+```
+
+If `abc012:::` is provided, we expect that the parse error happens at:
+
+```
+abc012:::
+      ^
+```
+
+But `VerboseError` reports the parse error at:
+
+```
+abc012:::
+^
+```
+
+This is because the last challenged parser is `tuple((digit1, alpha1, digit1))` and it is failed.
+`GreedyError` reports the parse error at the expected position.
+
 ## Requirement
 
 nom must be 5.0.0 or later.
