@@ -66,6 +66,7 @@ where
     }
 }
 
+/// get the deepest error position
 pub fn error_position<T: Position>(e: &GreedyError<T>) -> Option<usize> {
     e.errors.first().map(|x| x.0.position())
 }
