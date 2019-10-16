@@ -80,6 +80,110 @@ impl<T, U> Position for LocatedSpanEx<T, U> {
     }
 }
 
+pub trait AsStr {
+    fn as_str(&self) -> &str;
+}
+
+impl<'a> AsStr for &'a str {
+    #[inline(always)]
+    fn as_str(&self) -> &str {
+        self
+    }
+}
+
+impl AsStr for str {
+    #[inline(always)]
+    fn as_str(&self) -> &str {
+        self
+    }
+}
+
+impl<T: AsStr, X> AsStr for LocatedSpanEx<T, X> {
+    #[inline]
+    fn as_str(&self) -> &str {
+        self.fragment.as_str()
+    }
+}
+
+/// transforms a `GreedyError` into a trace with input position information
+pub fn convert_error<T: AsStr, U: AsStr>(input: T, e: GreedyError<U>) -> String {
+    use nom::Offset;
+    use std::iter::repeat;
+
+    let lines: Vec<_> = input.as_str().lines().map(String::from).collect();
+
+    let mut result = String::new();
+
+    for (i, (substring, kind)) in e.errors.iter().enumerate() {
+        let mut offset = input.as_str().offset(substring.as_str());
+
+        if lines.is_empty() {
+            match kind {
+                GreedyErrorKind::Char(c) => {
+                    result += &format!("{}: expected '{}', got empty input\n\n", i, c);
+                }
+                GreedyErrorKind::Context(s) => {
+                    result += &format!("{}: in {}, got empty input\n\n", i, s);
+                }
+                GreedyErrorKind::Nom(e) => {
+                    result += &format!("{}: in {:?}, got empty input\n\n", i, e);
+                }
+            }
+        } else {
+            let mut line = 0;
+            let mut column = 0;
+
+            for (j, l) in lines.iter().enumerate() {
+                if offset <= l.len() {
+                    line = j;
+                    column = offset;
+                    break;
+                } else {
+                    offset = offset - l.len() - 1;
+                }
+            }
+
+            match kind {
+                GreedyErrorKind::Char(c) => {
+                    result += &format!("{}: at line {}:\n", i, line);
+                    result += &lines[line];
+                    result += "\n";
+
+                    if column > 0 {
+                        result += &repeat(' ').take(column).collect::<String>();
+                    }
+                    result += "^\n";
+                    result += &format!(
+                        "expected '{}', found {}\n\n",
+                        c,
+                        substring.as_str().chars().next().unwrap()
+                    );
+                }
+                GreedyErrorKind::Context(s) => {
+                    result += &format!("{}: at line {}, in {}:\n", i, line, s);
+                    result += &lines[line];
+                    result += "\n";
+                    if column > 0 {
+                        result += &repeat(' ').take(column).collect::<String>();
+                    }
+                    result += "^\n\n";
+                }
+                GreedyErrorKind::Nom(e) => {
+                    result += &format!("{}: at line {}, in {:?}:\n", i, line, e);
+                    result += &lines[line];
+                    result += "\n";
+                    if column > 0 {
+                        result += &repeat(' ').take(column).collect::<String>();
+                    }
+                    result += "^\n\n";
+                }
+            }
+        }
+    }
+
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -102,7 +206,7 @@ mod tests {
     }
 
     #[test]
-    fn test() {
+    fn test_position() {
         // VerboseError failed at
         //   abc012:::
         //   ^
@@ -120,6 +224,24 @@ mod tests {
         let error = parser::<GreedyError<Span>>(Span::new("abc012:::"));
         match error {
             Err(nom::Err::Error(e)) => assert_eq!(error_position(&e), Some(6)),
+            _ => (),
+        };
+    }
+
+    #[test]
+    fn test_convert_error() {
+        let error = parser::<GreedyError<Span>>(Span::new("abc012:::"));
+        let msg = r##"0: at line 0, in Alpha:
+abc012:::
+      ^
+
+1: at line 0, in Alt:
+abc012:::
+^
+
+"##;
+        match error {
+            Err(nom::Err::Error(e)) => assert_eq!(convert_error("abc012:::", e), String::from(msg)),
             _ => (),
         };
     }
