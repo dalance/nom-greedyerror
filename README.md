@@ -1,5 +1,5 @@
 # nom-greedyerror
-Custom error type of [nom](https://github.com/Geal/nom) to take a deepest error.
+Custom error type of [nom](https://github.com/Geal/nom) to improve accuracy of error position.
 
 [![Actions Status](https://github.com/dalance/nom-greedyerror/workflows/Rust/badge.svg)](https://github.com/dalance/nom-greedyerror/actions)
 [![Crates.io](https://img.shields.io/crates/v/nom-greedyerror.svg)](https://crates.io/crates/nom-greedyerror)
