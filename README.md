@@ -16,7 +16,7 @@ nom must be 5.0.0 or later.
 
 ```Cargo.toml
 [dependencies]
-nom-greedyerror = "0.1.0"
+nom-greedyerror = "0.1.1"
 ```
 
 ## Example
