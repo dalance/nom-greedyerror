@@ -1,5 +1,4 @@
 use nom::error::{ErrorKind, ParseError};
-use nom_locate::LocatedSpanEx;
 
 /// This error type accumulates errors and their position when backtracking
 /// through a parse tree. This take a deepest error at `alt` combinator.
@@ -75,9 +74,15 @@ pub trait Position {
     fn position(&self) -> usize;
 }
 
-impl<T, U> Position for LocatedSpanEx<T, U> {
+impl<T, U> Position for nom_locate1::LocatedSpanEx<T, U> {
     fn position(&self) -> usize {
         self.offset
+    }
+}
+
+impl<T: nom::AsBytes, U> Position for nom_locate::LocatedSpan<T, U> {
+    fn position(&self) -> usize {
+        self.location_offset()
     }
 }
 
@@ -99,10 +104,17 @@ impl AsStr for str {
     }
 }
 
-impl<T: AsStr, X> AsStr for LocatedSpanEx<T, X> {
+impl<T: AsStr, X> AsStr for nom_locate1::LocatedSpanEx<T, X> {
     #[inline]
     fn as_str(&self) -> &str {
         self.fragment.as_str()
+    }
+}
+
+impl<T: AsStr + nom::AsBytes, X> AsStr for nom_locate::LocatedSpan<T, X> {
+    #[inline]
+    fn as_str(&self) -> &str {
+        self.fragment().as_str()
     }
 }
 
