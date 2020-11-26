@@ -2,6 +2,8 @@
 
 ## [Unreleased](https://github.com/dalance/nom-greedyerror/compare/v0.2.0...Unreleased) - ReleaseDate
 
+* [Added] nom 6.0.0 support
+
 ## [v0.2.0](https://github.com/dalance/nom-greedyerror/compare/v0.1.2...v0.2.0) - 2020-04-01
 
 * [Added] nom_locate 2.0.0 support

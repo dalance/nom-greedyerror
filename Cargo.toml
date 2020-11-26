@@ -24,6 +24,8 @@ pre-release-replacements    = [
 ]
 
 [dependencies]
-nom         = "5"
-nom_locate  = "2"
+nom5        = {version = "5", package = "nom"}
+nom6        = {version = "6", package = "nom"}
 nom_locate1 = {version = "1", package = "nom_locate"}
+nom_locate2 = {version = "2", package = "nom_locate"}
+nom_locate3 = {version = "3", package = "nom_locate"}

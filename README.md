@@ -48,12 +48,13 @@ nom-greedyerror = "0.2.0"
 ## Example
 
 ```rust
-use super::*;
 use nom::branch::alt;
 use nom::character::complete::{alpha1, digit1};
-use nom::error::{ParseError, VerboseError};
+use nom::error::{ErrorKind, ParseError, VerboseError};
 use nom::sequence::tuple;
+use nom::Err::Error;
 use nom::IResult;
+use nom_greedyerror::{error_position, GreedyError, Position};
 use nom_locate::LocatedSpan;
 
 type Span<'a> = LocatedSpan<&'a str>;
@@ -67,25 +68,24 @@ fn parser<'a, E: ParseError<Span<'a>>>(
     ))(input)
 }
 
-#[test]
-fn test() {
+fn main() {
     // VerboseError failed at
     //   abc012:::
     //   ^
     let error = parser::<VerboseError<Span>>(Span::new("abc012:::"));
+    dbg!(&error);
     match error {
-        Err(nom::Err::Error(e)) => {
-            assert_eq!(e.errors.first().map(|x| x.0.position()), Some(0))
-        }
+        Err(Error(e)) => assert_eq!(e.errors.first().map(|x| x.0.position()), Some(0)),
         _ => (),
     };
 
     // GreedyError failed at
     //   abc012:::
     //         ^
-    let error = parser::<GreedyError<Span>>(Span::new("abc012:::"));
+    let error = parser::<GreedyError<Span, ErrorKind>>(Span::new("abc012:::"));
+    dbg!(&error);
     match error {
-        Err(nom::Err::Error(e)) => assert_eq!(error_position(&e), Some(6)),
+        Err(Error(e)) => assert_eq!(error_position(&e), Some(6)),
         _ => (),
     };
 }
