@@ -60,6 +60,16 @@ where
     }
 }
 
+impl<I> nom6::error::ContextError<I> for GreedyError<I, nom6::error::ErrorKind>
+where
+    I: Position,
+{
+    fn add_context(input: I, ctx: &'static str, mut other: Self) -> Self {
+        other.errors.push((input, GreedyErrorKind::Context(ctx)));
+        other
+    }
+}
+
 impl<I> nom5::error::ParseError<I> for GreedyError<I, nom5::error::ErrorKind>
 where
     I: Position,
