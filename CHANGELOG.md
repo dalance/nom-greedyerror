@@ -1,6 +1,8 @@
 # Change Log
 
-## [Unreleased](https://github.com/dalance/nom-greedyerror/compare/v0.3.0...Unreleased) - ReleaseDate
+## [Unreleased](https://github.com/dalance/nom-greedyerror/compare/v0.3.1...Unreleased) - ReleaseDate
+
+## [v0.3.1](https://github.com/dalance/nom-greedyerror/compare/v0.3.0...v0.3.1) - 2020-11-27
 
 * [Added] ContextError implementation
 
