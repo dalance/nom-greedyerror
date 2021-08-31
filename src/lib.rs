@@ -20,17 +20,17 @@ pub enum GreedyErrorKind<E> {
     Nom(E),
 }
 
-impl<I> nom6::error::ParseError<I> for GreedyError<I, nom6::error::ErrorKind>
+impl<I> nom7::error::ParseError<I> for GreedyError<I, nom7::error::ErrorKind>
 where
     I: Position,
 {
-    fn from_error_kind(input: I, kind: nom6::error::ErrorKind) -> Self {
+    fn from_error_kind(input: I, kind: nom7::error::ErrorKind) -> Self {
         GreedyError {
             errors: vec![(input, GreedyErrorKind::Nom(kind))],
         }
     }
 
-    fn append(input: I, kind: nom6::error::ErrorKind, mut other: Self) -> Self {
+    fn append(input: I, kind: nom7::error::ErrorKind, mut other: Self) -> Self {
         other.errors.push((input, GreedyErrorKind::Nom(kind)));
         other
     }
@@ -60,7 +60,7 @@ where
     }
 }
 
-impl<I> nom6::error::ContextError<I> for GreedyError<I, nom6::error::ErrorKind>
+impl<I> nom7::error::ContextError<I> for GreedyError<I, nom7::error::ErrorKind>
 where
     I: Position,
 {
@@ -136,7 +136,7 @@ impl<T: nom5::AsBytes, U> Position for nom_locate2::LocatedSpan<T, U> {
     }
 }
 
-impl<T: nom6::AsBytes, U> Position for nom_locate3::LocatedSpan<T, U> {
+impl<T: nom7::AsBytes, U> Position for nom_locate4::LocatedSpan<T, U> {
     fn position(&self) -> usize {
         self.location_offset()
     }
@@ -174,7 +174,7 @@ impl<T: AsStr + nom5::AsBytes, X> AsStr for nom_locate2::LocatedSpan<T, X> {
     }
 }
 
-impl<T: AsStr + nom6::AsBytes, X> AsStr for nom_locate3::LocatedSpan<T, X> {
+impl<T: AsStr + nom7::AsBytes, X> AsStr for nom_locate4::LocatedSpan<T, X> {
     #[inline]
     fn as_str(&self) -> &str {
         self.fragment().as_str()
@@ -183,7 +183,7 @@ impl<T: AsStr + nom6::AsBytes, X> AsStr for nom_locate3::LocatedSpan<T, X> {
 
 /// transforms a `GreedyError` into a trace with input position information
 pub fn convert_error<T: AsStr, U: AsStr, V: Debug>(input: T, e: GreedyError<U, V>) -> String {
-    use nom6::Offset;
+    use nom7::Offset;
     use std::iter::repeat;
 
     let lines: Vec<_> = input.as_str().lines().map(String::from).collect();
@@ -261,15 +261,15 @@ pub fn convert_error<T: AsStr, U: AsStr, V: Debug>(input: T, e: GreedyError<U, V
 }
 
 #[cfg(test)]
-mod tests_nom6 {
+mod tests_nom7 {
     use super::*;
-    use nom6::branch::alt;
-    use nom6::character::complete::{alpha1, digit1};
-    use nom6::error::{ErrorKind, ParseError, VerboseError};
-    use nom6::sequence::tuple;
-    use nom6::Err;
-    use nom6::IResult;
-    use nom_locate3::LocatedSpan;
+    use nom7::branch::alt;
+    use nom7::character::complete::{alpha1, digit1};
+    use nom7::error::{ErrorKind, ParseError, VerboseError};
+    use nom7::sequence::tuple;
+    use nom7::Err;
+    use nom7::IResult;
+    use nom_locate4::LocatedSpan;
 
     type Span<'a> = LocatedSpan<&'a str>;
 

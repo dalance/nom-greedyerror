@@ -1,11 +1,11 @@
-use nom6::branch::alt;
-use nom6::character::complete::{alpha1, digit1};
-use nom6::error::{ErrorKind, ParseError, VerboseError};
-use nom6::sequence::tuple;
-use nom6::Err::Error;
-use nom6::IResult;
+use nom7::branch::alt;
+use nom7::character::complete::{alpha1, digit1};
+use nom7::error::{ErrorKind, ParseError, VerboseError};
+use nom7::sequence::tuple;
+use nom7::Err::Error;
+use nom7::IResult;
 use nom_greedyerror::{error_position, GreedyError, Position};
-use nom_locate3::LocatedSpan;
+use nom_locate4::LocatedSpan;
 
 type Span<'a> = LocatedSpan<&'a str>;
 
