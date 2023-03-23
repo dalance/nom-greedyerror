@@ -70,51 +70,6 @@ where
     }
 }
 
-impl<I> nom5::error::ParseError<I> for GreedyError<I, nom5::error::ErrorKind>
-where
-    I: Position,
-{
-    fn from_error_kind(input: I, kind: nom5::error::ErrorKind) -> Self {
-        GreedyError {
-            errors: vec![(input, GreedyErrorKind::Nom(kind))],
-        }
-    }
-
-    fn append(input: I, kind: nom5::error::ErrorKind, mut other: Self) -> Self {
-        other.errors.push((input, GreedyErrorKind::Nom(kind)));
-        other
-    }
-
-    fn from_char(input: I, c: char) -> Self {
-        GreedyError {
-            errors: vec![(input, GreedyErrorKind::Char(c))],
-        }
-    }
-
-    fn add_context(input: I, ctx: &'static str, mut other: Self) -> Self {
-        other.errors.push((input, GreedyErrorKind::Context(ctx)));
-        other
-    }
-
-    fn or(self, other: Self) -> Self {
-        let pos_self = if let Some(x) = self.errors.first() {
-            x.0.position()
-        } else {
-            0
-        };
-        let pos_other = if let Some(x) = other.errors.first() {
-            x.0.position()
-        } else {
-            0
-        };
-        if pos_other > pos_self {
-            other
-        } else {
-            self
-        }
-    }
-}
-
 /// get the deepest error position
 pub fn error_position<T: Position, E>(e: &GreedyError<T, E>) -> Option<usize> {
     e.errors.first().map(|x| x.0.position())
@@ -122,18 +77,6 @@ pub fn error_position<T: Position, E>(e: &GreedyError<T, E>) -> Option<usize> {
 
 pub trait Position {
     fn position(&self) -> usize;
-}
-
-impl<T, U> Position for nom_locate1::LocatedSpanEx<T, U> {
-    fn position(&self) -> usize {
-        self.offset
-    }
-}
-
-impl<T: nom5::AsBytes, U> Position for nom_locate2::LocatedSpan<T, U> {
-    fn position(&self) -> usize {
-        self.location_offset()
-    }
 }
 
 impl<T: nom7::AsBytes, U> Position for nom_locate4::LocatedSpan<T, U> {
@@ -157,20 +100,6 @@ impl AsStr for str {
     #[inline(always)]
     fn as_str(&self) -> &str {
         self
-    }
-}
-
-impl<T: AsStr, X> AsStr for nom_locate1::LocatedSpanEx<T, X> {
-    #[inline]
-    fn as_str(&self) -> &str {
-        self.fragment.as_str()
-    }
-}
-
-impl<T: AsStr + nom5::AsBytes, X> AsStr for nom_locate2::LocatedSpan<T, X> {
-    #[inline]
-    fn as_str(&self) -> &str {
-        self.fragment().as_str()
     }
 }
 
@@ -317,71 +246,6 @@ abc012:::
 "##;
         match error {
             Err(Err::Error(e)) => assert_eq!(convert_error("abc012:::", e), String::from(msg)),
-            _ => (),
-        };
-    }
-}
-
-#[cfg(test)]
-mod tests_nom5 {
-    use super::*;
-    use nom5::branch::alt;
-    use nom5::character::complete::{alpha1, digit1};
-    use nom5::error::{ParseError, VerboseError};
-    use nom5::sequence::tuple;
-    use nom5::IResult;
-    use nom_locate2::LocatedSpan;
-
-    type Span<'a> = LocatedSpan<&'a str>;
-
-    fn parser<'a, E: ParseError<Span<'a>>>(
-        input: Span<'a>,
-    ) -> IResult<Span<'a>, (Span<'a>, Span<'a>, Span<'a>), E> {
-        alt((
-            tuple((alpha1, digit1, alpha1)),
-            tuple((digit1, alpha1, digit1)),
-        ))(input)
-    }
-
-    #[test]
-    fn test_position() {
-        // VerboseError failed at
-        //   abc012:::
-        //   ^
-        let error = parser::<VerboseError<Span>>(Span::new("abc012:::"));
-        match error {
-            Err(nom5::Err::Error(e)) => {
-                assert_eq!(e.errors.first().map(|x| x.0.position()), Some(0))
-            }
-            _ => (),
-        };
-
-        // GreedyError failed at
-        //   abc012:::
-        //         ^
-        let error = parser::<GreedyError<Span, nom5::error::ErrorKind>>(Span::new("abc012:::"));
-        match error {
-            Err(nom5::Err::Error(e)) => assert_eq!(error_position(&e), Some(6)),
-            _ => (),
-        };
-    }
-
-    #[test]
-    fn test_convert_error() {
-        let error = parser::<GreedyError<Span, nom5::error::ErrorKind>>(Span::new("abc012:::"));
-        let msg = r##"0: at line 0, in Alpha:
-abc012:::
-      ^
-
-1: at line 0, in Alt:
-abc012:::
-^
-
-"##;
-        match error {
-            Err(nom5::Err::Error(e)) => {
-                assert_eq!(convert_error("abc012:::", e), String::from(msg))
-            }
             _ => (),
         };
     }
