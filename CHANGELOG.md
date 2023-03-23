@@ -1,6 +1,8 @@
 # Change Log
 
-## [Unreleased](https://github.com/dalance/nom-greedyerror/compare/v0.4.0...Unreleased) - ReleaseDate
+## [Unreleased](https://github.com/dalance/nom-greedyerror/compare/v0.5.0...Unreleased) - ReleaseDate
+
+## [v0.5.0](https://github.com/dalance/nom-greedyerror/compare/v0.4.0...v0.5.0) - 2023-03-23
 
 * [Changed] remove old nom support
 
